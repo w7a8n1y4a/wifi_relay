@@ -9,6 +9,7 @@ from config import settings
 def aes_add_padding(data: str) -> str:
     return data+chr(16-len(data)%16)*(16-len(data)%16)
 
+
 def aes_del_padding(data):
     return data[:-data[-1]]
 
