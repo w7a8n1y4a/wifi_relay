@@ -7,6 +7,8 @@ class BaseConfig:
     WIFI_PASS = ''
     PEPEUNIT_URL = ''
     PEPEUNIT_TOKEN = ''
+    SYNC_ENCRYPT_KEY = ''
+    SECRET_KEY = ''
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():

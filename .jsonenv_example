@@ -3,5 +3,6 @@
     "WIFI_PASS": "",
     "PEPEUNIT_URL": "https://pepemoss.com/monkey_files_robot",
     "PEPEUNIT_TOKEN": "",
+    "SYNC_ENCRYPT_KEY": "",
     "SECRET_KEY": ""
 }
