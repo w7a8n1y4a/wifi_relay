@@ -1,0 +1,8 @@
+{
+    "input_variables": [
+        {"input_relay_state": "bool"}
+    ],
+    "output_variables": [
+        {"output_relay_state": "bool"}
+    ]
+}

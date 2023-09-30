@@ -14,7 +14,7 @@ class BaseConfig:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-with open('.jsonenv', 'r') as f:
+with open('env.json', 'r') as f:
     jsonenv = json.loads(f.read())
 
 settings = BaseConfig(**jsonenv)
