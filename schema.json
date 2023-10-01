@@ -1,4 +1,7 @@
 {   
+    "world_state": {
+        "current_datetime": "datetime"
+    },
     "unit_state": {
         "network_ip": "string",
         "usage_ram": "int",
