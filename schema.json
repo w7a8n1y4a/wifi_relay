@@ -1,4 +1,10 @@
-{
+{   
+    "unit_state": {
+        "network_ip": "string",
+        "usage_ram": "int",
+        "time_millis": "int",
+        "signal_dbi": "float"
+    },
     "input_variables": [
         {"input_relay_state": "bool"}
     ],
