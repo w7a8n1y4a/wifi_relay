@@ -16,8 +16,8 @@ def aes_del_padding(data):
 
 def aes_encode(data: str) -> str:
     """
-    data: any utf-8 str
-    return: (base64 str - iv)."base64 str - encrypted data)
+    data: any python str
+    return: (base64 str - iv).(base64 str - encrypted data)
     """
     key = binascii.a2b_base64(settings.SYNC_ENCRYPT_KEY)
     iv = uos.urandom(16)
@@ -32,8 +32,8 @@ def aes_encode(data: str) -> str:
 
 def aes_decode(data: str) -> str:
     """
-    data: (base64 str - iv).base64 str - encrypted data)
-    return: decode aes utf-8 str
+    data: (base64 str - iv).(base64 str - encrypted data)
+    return: decode python str
     """
     key = binascii.a2b_base64(settings.SYNC_ENCRYPT_KEY)
     iv = binascii.a2b_base64(data.split('.')[0].encode())
