@@ -8,7 +8,9 @@ from config import settings
 
 # Default MQTT MQTT_BROKER to connect to
 SERVER = settings.PEPEUNIT_URL
-CLIENT_ID = ubinascii.hexlify(machine.unique_id())
+CLIENT_ID = b'test'
+print(CLIENT_ID)
+
 TOPIC = b"co2"
 
 
@@ -19,7 +21,7 @@ def reset():
     
 
 def main():
-    mqttClient = MQTTClient(CLIENT_ID, SERVER, keepalive=60)
+    mqttClient = MQTTClient(CLIENT_ID, SERVER, user='1234124'.encode(), password='23423423'.encode(), keepalive=60)
     mqttClient.connect()
     print(f"Connected to MQTT  Broker :: {SERVER}")
 
