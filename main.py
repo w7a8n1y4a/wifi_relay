@@ -5,12 +5,9 @@ import ubinascii
 from umqtt.simple import MQTTClient
 
 from config import settings
+from utils.utils import get_unit_uuid
 
 # Default MQTT MQTT_BROKER to connect to
-SERVER = settings.PEPEUNIT_URL
-CLIENT_ID = b'test'
-print(CLIENT_ID)
-
 TOPIC = b"co2"
 
 
@@ -21,9 +18,15 @@ def reset():
     
 
 def main():
-    mqttClient = MQTTClient(CLIENT_ID, SERVER, user='1234124'.encode(), password='23423423'.encode(), keepalive=60)
+    mqttClient = MQTTClient(
+        get_unit_uuid(settings.PEPEUNIT_TOKEN),
+        settings.PEPEUNIT_URL,
+        user=settings.PEPEUNIT_TOKEN.encode(),
+        password=" ".encode(),
+        keepalive=60
+        )
     mqttClient.connect()
-    print(f"Connected to MQTT  Broker :: {SERVER}")
+    print(f"Connected to MQTT  Broker :: {settings.PEPEUNIT_URL}")
 
     while True:
         time_true_pulse_us = machine.time_pulse_us(machine.Pin(15, machine.Pin.IN), 1000000)
