@@ -1,17 +1,14 @@
 {   
-    "world_state": {
-        "current_datetime": "datetime"
-    },
-    "unit_state": {
-        "network_ip": "string",
-        "usage_ram": "int",
-        "time_millis": "int",
-        "signal_dbi": "float"
-    },
-    "input_variables": [
-        {"input_relay_state": "bool"}
+    "output_base_topic": [
+        "network_ip",
+        "usage_ram",
+        "time_millis",
+        "signal_dbi"
     ],
-    "output_variables": [
-        {"output_relay_state": "bool"}
+    "input_topic": [
+        "relay_state"
+    ],
+    "output_topic": [
+        "current_relay_state"
     ]
 }
