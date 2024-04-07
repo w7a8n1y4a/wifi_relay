@@ -1,4 +1,8 @@
 {   
+    "input_base_topic": [
+        "update",
+        "current_datetime"
+    ],
     "output_base_topic": [
         "network_ip",
         "usage_ram",
