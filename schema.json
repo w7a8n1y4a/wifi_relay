@@ -1,13 +1,10 @@
 {   
     "input_base_topic": [
         "update",
-        "current_datetime"
+        "pepeunit_info"
     ],
     "output_base_topic": [
-        "network_ip",
-        "usage_ram",
-        "time_millis",
-        "signal_dbi"
+        "state"
     ],
     "input_topic": [
         "relay_state"
