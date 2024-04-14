@@ -11,12 +11,15 @@ from utils.utils import get_unit_uuid
 TOPIC = b"test/co2"
 TOPIC2 = b"test/bebra"
 
+ping_interval = 30
 
 def reset():
     print("Resetting...")
     time.sleep(5)
     machine.reset()
     
+def sub_cb(topic, msg):
+    print((topic, msg))
 
 def main():
     mqttClient = MQTTClient(
@@ -26,7 +29,9 @@ def main():
         password=" ".encode(),
         keepalive=60
         )
+    mqttClient.set_callback(sub_cb)
     mqttClient.connect()
+    mqttClient.subscribe('test/kek')
     print(f"Connected to MQTT  Broker :: {settings.PEPEUNIT_URL}")
 
     test = [
@@ -56,17 +61,27 @@ def main():
         'n_zwelf'
         ]
 
+    last_ping = time.time()
     while True:
-        # time_true_pulse_us = machine.time_pulse_us(machine.Pin(15, machine.Pin.IN), 1000000)
-        # print(time_true_pulse_us)
-        # ppm = 2000 * (time_true_pulse_us/1000000)
-        ppm = 3228
-        random_temp = f'{time.ticks_ms()} - ppm - {str(ppm)}'
-        print(f"millis - {time.ticks_ms()} - ppm - {str(ppm)}")
 
+        # time_true_pulse_us = machine.time_pulse_us(machine.Pin(15, machine.Pin.IN), 1000000)
+        # ppm = 2000 * (time_true_pulse_us/1000000)
+        # print(time_true_pulse_us)
+        ppm = 3228
+        random_temp = f'{time.ticks_ms()//100} - ppm - {str(ppm)}'
+        print(f"millis - {time.ticks_ms()//100} - ppm - {str(ppm)}")
+        
         for item in range(0, 1):
             mqttClient.publish(f'test/{test[item]}'.encode(), str(random_temp).encode())
         
+        mqttClient.check_msg()
+
+        if (time.time() - last_ping) >= ping_interval:
+            mqttClient.ping()
+            last_ping = time.time()
+
+        time.sleep(1)
+
     mqttClient.disconnect()
     
     
