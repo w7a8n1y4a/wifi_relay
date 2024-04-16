@@ -5,13 +5,7 @@ import ubinascii
 from umqtt.simple import MQTTClient
 
 from config import settings
-from utils.utils import get_unit_uuid
-
-# Default MQTT MQTT_BROKER to connect to
-TOPIC = b"test/co2"
-TOPIC2 = b"test/bebra"
-
-ping_interval = 30
+from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state
 
 def reset():
     print("Resetting...")
@@ -22,61 +16,53 @@ def sub_cb(topic, msg):
     print((topic, msg))
 
 def main():
+
+    unit_uuid = get_unit_uuid(settings.PEPEUNIT_TOKEN)
+
     mqttClient = MQTTClient(
-        get_unit_uuid(settings.PEPEUNIT_TOKEN),
+        unit_uuid,
         settings.PEPEUNIT_URL,
         user=settings.PEPEUNIT_TOKEN.encode(),
         password=" ".encode(),
         keepalive=60
-        )
+    )
     mqttClient.set_callback(sub_cb)
     mqttClient.connect()
-    mqttClient.subscribe('test/kek')
+
+    unit_topics = get_unit_topics()
+
+    for input_topic in unit_topics['input_topic']:
+        mqttClient.subscribe(f'input/{unit_uuid}/{input_topic}')
+    
+    for input_topic in unit_topics['input_base_topic']:
+        mqttClient.subscribe(f'input_base/{unit_uuid}/{input_topic}')
+
     print(f"Connected to MQTT  Broker :: {settings.PEPEUNIT_URL}")
-
-    test = [
-        'first',
-        'two',
-        'three',
-        'four',
-        'five',
-        'six',
-        'seven',
-        'acht',
-        'neun',
-        'zein',
-        'elf',
-        'zwelf'
-        'n_first',
-        'n_two',
-        'n_three',
-        'n_four',
-        'n_five',
-        'n_six',
-        'n_seven',
-        'n_acht',
-        'n_neun',
-        'n_zein',
-        'n_elf',
-        'n_zwelf'
-        ]
-
+    
+    last_state_pub = time.time()
     last_ping = time.time()
     while True:
-
         # time_true_pulse_us = machine.time_pulse_us(machine.Pin(15, machine.Pin.IN), 1000000)
         # ppm = 2000 * (time_true_pulse_us/1000000)
         # print(time_true_pulse_us)
+
         ppm = 3228
         random_temp = f'{time.ticks_ms()//100} - ppm - {str(ppm)}'
         print(f"millis - {time.ticks_ms()//100} - ppm - {str(ppm)}")
         
         for item in range(0, 1):
-            mqttClient.publish(f'test/{test[item]}'.encode(), str(random_temp).encode())
+            mqttClient.publish(f'output/{unit_uuid}/{unit_topics['output_topic'][0]}'.encode(), str(random_temp).encode())
         
         mqttClient.check_msg()
 
-        if (time.time() - last_ping) >= ping_interval:
+        if (time.time() - last_state_pub) >= settings.STATE_SEND_INTERVAL:
+            mqttClient.publish(
+                f'output_base/{unit_uuid}/{unit_topics['output_base_topic'][0]}'.encode(),
+                get_unit_state(sta_if.ifconfig()).encode()
+            )
+            last_state_pub = time.time()
+
+        if (time.time() - last_ping) >= settings.PING_INTERVAL:
             mqttClient.ping()
             last_ping = time.time()
 
