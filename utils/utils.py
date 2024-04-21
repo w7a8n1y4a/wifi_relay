@@ -1,4 +1,5 @@
 import gc
+import os
 import time
 import binascii
 import json
@@ -23,7 +24,7 @@ def get_unit_state(ifconfig):
         'mem_free': gc.mem_free(),
         'mem_alloc': gc.mem_alloc(),
         'freq': machine.freq(),
-        'flash_size': esp.flash_size()
+        'statvfs': os.statvfs('/')
     }
 
     return json.dumps(state_dict)

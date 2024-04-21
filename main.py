@@ -47,8 +47,8 @@ def main():
         # print(time_true_pulse_us)
 
         ppm = 3228
-        random_temp = f'{time.ticks_ms()//100} - ppm - {str(ppm)}'
-        print(f"millis - {time.ticks_ms()//100} - ppm - {str(ppm)}")
+        random_temp = f'{time.ticks_ms()//10000} - ppm - {str(ppm)}'
+        print(f"millis - {time.ticks_ms()//10000} - ppm - {str(ppm)}")
         
         for item in range(0, 1):
             mqttClient.publish(f'output/{unit_uuid}/{unit_topics['output_topic'][0]}'.encode(), str(random_temp).encode())

@@ -1,7 +1,6 @@
 {   
     "input_base_topic": [
-        "update",
-        "pepeunit_info"
+        "update"
     ],
     "output_base_topic": [
         "state"
