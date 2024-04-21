@@ -6,6 +6,7 @@ class BaseConfig:
     WIFI_SSID = ''
     WIFI_PASS = ''
     PEPEUNIT_URL = ''
+    MQTT_URL = ''
     PEPEUNIT_TOKEN = ''
     SYNC_ENCRYPT_KEY = ''
     SECRET_KEY = ''

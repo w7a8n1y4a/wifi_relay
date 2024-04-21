@@ -21,7 +21,7 @@ def main():
 
     mqttClient = MQTTClient(
         unit_uuid,
-        settings.PEPEUNIT_URL,
+        settings.MQTT_URL,
         user=settings.PEPEUNIT_TOKEN.encode(),
         password=" ".encode(),
         keepalive=60
@@ -37,7 +37,7 @@ def main():
     for input_topic in unit_topics['input_base_topic']:
         mqttClient.subscribe(f'input_base/{unit_uuid}/{input_topic}')
 
-    print(f"Connected to MQTT  Broker :: {settings.PEPEUNIT_URL}")
+    print(f"Connected to MQTT  Broker :: {settings.MQTT_URL}")
     
     last_state_pub = time.time()
     last_ping = time.time()
