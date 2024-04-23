@@ -2,10 +2,13 @@ import time
 import uos
 import machine
 import ubinascii
-from umqtt.simple import MQTTClient
+import mrequests
+from utils.utils import *
+from lib.simple import MQTTClient
 
 from config import settings
 from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state
+
 
 def reset():
     print("Resetting...")
@@ -13,7 +16,29 @@ def reset():
     machine.reset()
     
 def sub_cb(topic, msg):
+    headers = {
+        'accept': 'application/json',
+        'token': settings.PEPEUNIT_TOKEN.encode()
+    }
+
+    url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
+
+    r = mrequests.get(url=url, headers=headers)
+
+    filename = '/beb/test.zip'
+
+    os.mkdir('beb')
+
+    if r.status_code == 200:
+        r.save(filename, buf=bytearray(512))
+        print("Image saved to '{}'.".format(filename))
+    else:
+        print("Request failed. Status: {}".format(r.status_code))
+
+    r.close()
+
     print((topic, msg))
+
 
 def main():
 
