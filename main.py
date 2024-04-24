@@ -26,7 +26,7 @@ def sub_cb(topic, msg):
         'token': settings.PEPEUNIT_TOKEN.encode()
     }
 
-    url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tar/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
+    url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
 
     r = mrequests.get(url=url, headers=headers)
 
