@@ -1,10 +1,15 @@
+import io
 import time
 import uos
 import machine
 import ubinascii
 import mrequests
-from utils.utils import *
+import tarfile
+import port_diag
+
 from lib.simple import MQTTClient
+
+from utils.utils import *
 
 from config import settings
 from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state
@@ -21,21 +26,30 @@ def sub_cb(topic, msg):
         'token': settings.PEPEUNIT_TOKEN.encode()
     }
 
-    url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
+    url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tar/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
 
     r = mrequests.get(url=url, headers=headers)
 
-    filename = '/beb/test.zip'
+    filename = '/beb/test.tar'
 
     os.mkdir('beb')
 
+    print('test')
+
     if r.status_code == 200:
-        r.save(filename, buf=bytearray(512))
+        r.save(filename, buf=bytearray(256))
         print("Image saved to '{}'.".format(filename))
     else:
         print("Request failed. Status: {}".format(r.status_code))
 
     r.close()
+
+    p = tarfile.TarFile(filename)
+    
+    print('kek')
+    
+    for item in p:
+        print(item.size, item.name)
 
     print((topic, msg))
 
