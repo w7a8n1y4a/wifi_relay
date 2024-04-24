@@ -5,7 +5,7 @@ import machine
 import ubinascii
 import mrequests
 import tarfile
-import port_diag
+import deflate
 
 from lib.simple import MQTTClient
 
@@ -44,12 +44,15 @@ def sub_cb(topic, msg):
 
     r.close()
 
-    p = tarfile.TarFile(filename)
-    
-    print('kek')
-    
-    for item in p:
-        print(item.size, item.name)
+    with open(filename, 'rb') as tgz:
+
+        f1 = deflate.DeflateIO(tgz)
+        p = tarfile.TarFile(fileobj=f1)
+        
+        print('kek')
+        
+        for item in p:
+            print(item.size, item.name)
 
     print((topic, msg))
 
