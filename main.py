@@ -6,6 +6,7 @@ import ubinascii
 import mrequests
 import tarfile
 import deflate
+import shutil
 
 from lib.simple import MQTTClient
 
@@ -14,6 +15,22 @@ from utils.utils import *
 from config import settings
 from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state
 
+def _makedirs(name, mode=0o777):
+    ret = False
+    s = ""
+    comps = name.rstrip("/").split("/")[:-1]
+    if comps[0] == "":
+        s = "/"
+    for c in comps:
+        if s and s[-1] != "/":
+            s += "/"
+        s += c
+        try:
+            os.mkdir(s)
+            ret = True
+        except:
+            pass
+    return ret
 
 def reset():
     print("Resetting...")
@@ -21,41 +38,63 @@ def reset():
     machine.reset()
     
 def sub_cb(topic, msg):
+
+    print((topic, msg))
+
     headers = {
         'accept': 'application/json',
         'token': settings.PEPEUNIT_TOKEN.encode()
     }
 
     url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
+    
+    print('start')
 
     r = mrequests.get(url=url, headers=headers)
 
-    filename = '/beb/test.tar'
+    filename = 'update.tgz'
+    filepath = f'/tmp/{filename}'
 
-    os.mkdir('beb')
+    os.mkdir('/tmp')
 
-    print('test')
+    print(filepath)
 
     if r.status_code == 200:
-        r.save(filename, buf=bytearray(256))
-        print("Image saved to '{}'.".format(filename))
+        r.save(filepath, buf=bytearray(256))
+        print(f".tgz saved to {filepath}")
     else:
-        print("Request failed. Status: {}".format(r.status_code))
+        print(f"Request failed. Status: {r.status_code}")
 
     r.close()
+    
+    tmp_update_path = '/update/'
+    os.mkdir(tmp_update_path[:-1])
+    with open(filepath, 'rb') as tgz:
 
-    with open(filename, 'rb') as tgz:
-
-        f1 = deflate.DeflateIO(tgz)
-        p = tarfile.TarFile(fileobj=f1)
+        tar_file = deflate.DeflateIO(tgz, deflate.AUTO, 9)
+        unpack_tar = tarfile.TarFile(fileobj=tar_file)
         
-        print('kek')
+        print('start save files')
         
-        for item in p:
-            print(item.size, item.name)
+        for unpack_file in unpack_tar:
 
-    print((topic, msg))
+            print(unpack_file.size, unpack_file.name, unpack_file.type)
 
+            if unpack_file.type != tarfile.DIRTYPE and not '@PaxHeader' in unpack_file.name:
+
+                out_filepath = tmp_update_path + unpack_file.name[2:]
+
+                print(out_filepath)
+
+                _makedirs(out_filepath)
+
+                subf = unpack_tar.extractfile(unpack_file)
+
+                with open(out_filepath, "wb") as outf:
+                    
+                    shutil.copyfileobj(subf, outf)
+
+                    outf.close()
 
 def main():
 
