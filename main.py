@@ -13,27 +13,10 @@ from lib.simple import MQTTClient
 from utils.utils import *
 
 from config import settings
-from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state
-
-def _makedirs(name, mode=0o777):
-    ret = False
-    s = ""
-    comps = name.rstrip("/").split("/")[:-1]
-    if comps[0] == "":
-        s = "/"
-    for c in comps:
-        if s and s[-1] != "/":
-            s += "/"
-        s += c
-        try:
-            os.mkdir(s)
-            ret = True
-        except:
-            pass
-    return ret
+from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state, copy_directory, makedirs
 
 def reset():
-    print("Resetting...")
+    print("I'll be back")
     time.sleep(5)
     machine.reset()
     
@@ -86,7 +69,7 @@ def sub_cb(topic, msg):
 
                 print(out_filepath)
 
-                _makedirs(out_filepath)
+                makedirs(out_filepath)
 
                 subf = unpack_tar.extractfile(unpack_file)
 
@@ -95,6 +78,14 @@ def sub_cb(topic, msg):
                     shutil.copyfileobj(subf, outf)
 
                     outf.close()
+
+    os.remove(filepath)
+    
+    copy_directory('/update', '')
+
+    shutil.rmtree('/update')
+
+    reset()
 
 def main():
 
