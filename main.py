@@ -116,8 +116,6 @@ def main():
         # ppm = 2000 * (time_true_pulse_us/1000000)
         # print(time_true_pulse_us)
 
-        gc.collect()
-
         ppm = 3228
         random_temp = f'{time.ticks_ms()//10000} - ppm - {str(ppm)}'
         print(f"millis - {time.ticks_ms()//10000} - ppm - {str(ppm)}")
