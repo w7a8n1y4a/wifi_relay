@@ -38,8 +38,6 @@ def sub_cb(topic, msg):
     filename = 'update.tgz'
     filepath = f'/tmp/{filename}'
 
-    os.mkdir('/tmp')
-
     print(filepath)
 
     if r.status_code == 200:
@@ -117,6 +115,8 @@ def main():
         # time_true_pulse_us = machine.time_pulse_us(machine.Pin(15, machine.Pin.IN), 1000000)
         # ppm = 2000 * (time_true_pulse_us/1000000)
         # print(time_true_pulse_us)
+
+        gc.collect()
 
         ppm = 3228
         random_temp = f'{time.ticks_ms()//10000} - ppm - {str(ppm)}'
