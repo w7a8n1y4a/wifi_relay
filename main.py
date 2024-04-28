@@ -24,6 +24,9 @@ def sub_cb(topic, msg):
 
     print((topic, msg))
 
+    mqttClient.disconnect()
+    gc.collect()
+
     headers = {
         'accept': 'application/json',
         'token': settings.PEPEUNIT_TOKEN.encode()
@@ -89,15 +92,23 @@ def main():
 
     unit_uuid = get_unit_uuid(settings.PEPEUNIT_TOKEN)
 
+    global mqttClient
+
+    gc.collect()
+
     mqttClient = MQTTClient(
         unit_uuid,
         settings.MQTT_URL,
         user=settings.PEPEUNIT_TOKEN.encode(),
         password=" ".encode(),
-        keepalive=60
+        keepalive=60,
+        ssl=True
     )
+
     mqttClient.set_callback(sub_cb)
     mqttClient.connect()
+
+    print(gc.mem_free(), gc.mem_alloc())
 
     unit_topics = get_unit_topics()
 
