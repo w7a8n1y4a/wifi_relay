@@ -6,8 +6,7 @@
         "state"
     ],
     "input_topic": [
-        "relay_state",
-        "test"
+        "relay_state"
     ],
     "output_topic": [
         "current_relay_state"
