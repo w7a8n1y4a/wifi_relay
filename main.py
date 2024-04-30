@@ -1,6 +1,6 @@
 import io
 import time
-import uos
+import os
 import machine
 import mrequests
 import shutil
