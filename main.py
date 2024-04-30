@@ -2,18 +2,14 @@ import io
 import time
 import uos
 import machine
-import ubinascii
 import mrequests
-import tarfile
-import deflate
 import shutil
 
-from lib.simple import MQTTClient
+from lib.mqtt.simple import MQTTClient
 
 from utils.utils import *
-
+from utils.update import *
 from config import settings
-from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state, get_topic_split, copy_directory, makedirs
 
 def reset():
     print("I'll be back")
@@ -24,8 +20,6 @@ def sub_callback(topic, state):
 
     destination, unit_uuid, topic_name = get_topic_split(topic)
     
-    print(destination, unit_uuid, topic_name, state)
-
     if destination == 'input_base' and topic_name == 'update':
 
         mqttClient.disconnect()
@@ -38,56 +32,20 @@ def sub_callback(topic, state):
 
         url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
         
-        print('start')
-
         r = mrequests.get(url=url, headers=headers)
 
-        filename = 'update.tgz'
-        filepath = f'/tmp/{filename}'
-
-        print(filepath)
+        filepath = f'/tmp/update.tgz'
+        tmp_update_path = '/update/'
 
         if r.status_code == 200:
             r.save(filepath, buf=bytearray(256))
-            print(f".tgz saved to {filepath}")
-        else:
-            print(f"Request failed. Status: {r.status_code}")
 
         r.close()
         
-        tmp_update_path = '/update/'
-        os.mkdir(tmp_update_path[:-1])
-        with open(filepath, 'rb') as tgz:
-
-            tar_file = deflate.DeflateIO(tgz, deflate.AUTO, 9)
-            unpack_tar = tarfile.TarFile(fileobj=tar_file)
-            
-            print('start save files')
-            
-            for unpack_file in unpack_tar:
-
-                print(unpack_file.size, unpack_file.name, unpack_file.type)
-
-                if unpack_file.type != tarfile.DIRTYPE and not '@PaxHeader' in unpack_file.name:
-
-                    out_filepath = tmp_update_path + unpack_file.name[2:]
-
-                    print(out_filepath)
-
-                    makedirs(out_filepath)
-
-                    subf = unpack_tar.extractfile(unpack_file)
-
-                    with open(out_filepath, "wb") as outf:
-                        
-                        shutil.copyfileobj(subf, outf)
-
-                        outf.close()
-
+        unpack_tgz(filepath, tmp_update_path)
         os.remove(filepath)
         
         copy_directory('/update', '')
-
         shutil.rmtree('/update')
 
         reset()
@@ -111,8 +69,6 @@ def main():
 
     mqttClient.set_callback(sub_callback)
     mqttClient.connect()
-
-    print(gc.mem_free(), gc.mem_alloc())
 
     unit_topics = get_unit_topics()
 
