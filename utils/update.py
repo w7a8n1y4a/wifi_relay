@@ -1,19 +1,24 @@
 import os
-import shutil
 import tarfile
 import deflate
 
 def unpack_tgz(tgz_path, to_path):
-    os.mkdir(to_path[:-1])
+    os.mkdir(to_path)
     with open(tgz_path, 'rb') as tgz:
         tar_file = deflate.DeflateIO(tgz, deflate.AUTO, 9)
         unpack_tar = tarfile.TarFile(fileobj=tar_file)
         for unpack_file in unpack_tar:
             if unpack_file.type != tarfile.DIRTYPE and not '@PaxHeader' in unpack_file.name:
-                out_filepath = to_path + unpack_file.name[2:]
+                out_filepath = to_path + '/' + unpack_file.name[2:]
                 makedirs(out_filepath)
                 subf = unpack_tar.extractfile(unpack_file)
                 with open(out_filepath, "wb") as outf:
+
+                    try:
+                        import shutil
+                    except ImportError:
+                        pass
+
                     shutil.copyfileobj(subf, outf)
                     outf.close()
 

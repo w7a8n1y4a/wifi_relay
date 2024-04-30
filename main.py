@@ -35,18 +35,17 @@ def sub_callback(topic, state):
         r = mrequests.get(url=url, headers=headers)
 
         filepath = f'/tmp/update.tgz'
-        tmp_update_path = '/update/'
-
         if r.status_code == 200:
             r.save(filepath, buf=bytearray(256))
 
         r.close()
         
+        tmp_update_path = '/update'
         unpack_tgz(filepath, tmp_update_path)
         os.remove(filepath)
         
-        copy_directory('/update', '')
-        shutil.rmtree('/update')
+        copy_directory(tmp_update_path, '')
+        shutil.rmtree(tmp_update_path)
 
         reset()
 
