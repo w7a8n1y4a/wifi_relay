@@ -55,5 +55,5 @@ def copy_directory(from_path, to_path):
         if entry[1] == 0x4000:
             copy_directory(from_path + '/' + entry[0], to_path + '/' + entry[0])
         else:
-            print(from_path, entry[0])
+            print(f'{from_path}/{entry[0]}')
             copy_file(from_path + '/' + entry[0], to_path + '/' + entry[0])
