@@ -29,6 +29,9 @@ def get_unit_state(ifconfig):
 
     return json.dumps(state_dict)
 
+def get_topic_split(topic):
+    return tuple(topic.decode().split('/'))
+
 def makedirs(name, mode=0o777):
     ret = False
     s = ""

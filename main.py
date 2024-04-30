@@ -13,80 +13,84 @@ from lib.simple import MQTTClient
 from utils.utils import *
 
 from config import settings
-from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state, copy_directory, makedirs
+from utils.utils import get_unit_uuid, get_unit_topics, get_unit_state, get_topic_split, copy_directory, makedirs
 
 def reset():
     print("I'll be back")
     time.sleep(5)
     machine.reset()
     
-def sub_cb(topic, msg):
+def sub_callback(topic, state):
 
-    print((topic, msg))
-
-    mqttClient.disconnect()
-    gc.collect()
-
-    headers = {
-        'accept': 'application/json',
-        'token': settings.PEPEUNIT_TOKEN.encode()
-    }
-
-    url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
+    destination, unit_uuid, topic_name = get_topic_split(topic)
     
-    print('start')
+    print(destination, unit_uuid, topic_name, state)
 
-    r = mrequests.get(url=url, headers=headers)
+    if destination == 'input_base' and topic_name == 'update':
 
-    filename = 'update.tgz'
-    filepath = f'/tmp/{filename}'
+        mqttClient.disconnect()
+        gc.collect()
 
-    print(filepath)
+        headers = {
+            'accept': 'application/json',
+            'token': settings.PEPEUNIT_TOKEN.encode()
+        }
 
-    if r.status_code == 200:
-        r.save(filepath, buf=bytearray(256))
-        print(f".tgz saved to {filepath}")
-    else:
-        print(f"Request failed. Status: {r.status_code}")
-
-    r.close()
-    
-    tmp_update_path = '/update/'
-    os.mkdir(tmp_update_path[:-1])
-    with open(filepath, 'rb') as tgz:
-
-        tar_file = deflate.DeflateIO(tgz, deflate.AUTO, 9)
-        unpack_tar = tarfile.TarFile(fileobj=tar_file)
+        url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
         
-        print('start save files')
+        print('start')
+
+        r = mrequests.get(url=url, headers=headers)
+
+        filename = 'update.tgz'
+        filepath = f'/tmp/{filename}'
+
+        print(filepath)
+
+        if r.status_code == 200:
+            r.save(filepath, buf=bytearray(256))
+            print(f".tgz saved to {filepath}")
+        else:
+            print(f"Request failed. Status: {r.status_code}")
+
+        r.close()
         
-        for unpack_file in unpack_tar:
+        tmp_update_path = '/update/'
+        os.mkdir(tmp_update_path[:-1])
+        with open(filepath, 'rb') as tgz:
 
-            print(unpack_file.size, unpack_file.name, unpack_file.type)
+            tar_file = deflate.DeflateIO(tgz, deflate.AUTO, 9)
+            unpack_tar = tarfile.TarFile(fileobj=tar_file)
+            
+            print('start save files')
+            
+            for unpack_file in unpack_tar:
 
-            if unpack_file.type != tarfile.DIRTYPE and not '@PaxHeader' in unpack_file.name:
+                print(unpack_file.size, unpack_file.name, unpack_file.type)
 
-                out_filepath = tmp_update_path + unpack_file.name[2:]
+                if unpack_file.type != tarfile.DIRTYPE and not '@PaxHeader' in unpack_file.name:
 
-                print(out_filepath)
+                    out_filepath = tmp_update_path + unpack_file.name[2:]
 
-                makedirs(out_filepath)
+                    print(out_filepath)
 
-                subf = unpack_tar.extractfile(unpack_file)
+                    makedirs(out_filepath)
 
-                with open(out_filepath, "wb") as outf:
-                    
-                    shutil.copyfileobj(subf, outf)
+                    subf = unpack_tar.extractfile(unpack_file)
 
-                    outf.close()
+                    with open(out_filepath, "wb") as outf:
+                        
+                        shutil.copyfileobj(subf, outf)
 
-    os.remove(filepath)
-    
-    copy_directory('/update', '')
+                        outf.close()
 
-    shutil.rmtree('/update')
+        os.remove(filepath)
+        
+        copy_directory('/update', '')
 
-    reset()
+        shutil.rmtree('/update')
+
+        reset()
 
 def main():
 
@@ -105,7 +109,7 @@ def main():
         ssl=True
     )
 
-    mqttClient.set_callback(sub_cb)
+    mqttClient.set_callback(sub_callback)
     mqttClient.connect()
 
     print(gc.mem_free(), gc.mem_alloc())
