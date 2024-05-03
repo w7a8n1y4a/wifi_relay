@@ -27,7 +27,7 @@ def sub_callback(topic, state):
 
         headers = {
             'accept': 'application/json',
-            'token': settings.PEPEUNIT_TOKEN.encode()
+            'x-auth-token': settings.PEPEUNIT_TOKEN.encode()
         }
 
         url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
