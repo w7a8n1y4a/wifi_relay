@@ -30,4 +30,4 @@ def get_unit_state(ifconfig):
     return json.dumps(state_dict)
 
 def get_topic_split(topic):
-    return tuple(topic.decode().split('/'))
+    return tuple(topic.split('/'))

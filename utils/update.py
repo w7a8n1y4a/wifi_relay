@@ -3,7 +3,11 @@ import tarfile
 import deflate
 
 def unpack_tgz(tgz_path, to_path):
-    os.mkdir(to_path)
+    try:
+        os.mkdir(to_path)
+    except:
+        pass
+
     with open(tgz_path, 'rb') as tgz:
         tar_file = deflate.DeflateIO(tgz, deflate.AUTO, 9)
         unpack_tar = tarfile.TarFile(fileobj=tar_file)
