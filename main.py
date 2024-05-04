@@ -30,7 +30,7 @@ def sub_callback(topic, state):
             'x-auth-token': settings.PEPEUNIT_TOKEN.encode()
         }
 
-        url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
+        url = f'{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
         
         r = mrequests.get(url=url, headers=headers)
 
