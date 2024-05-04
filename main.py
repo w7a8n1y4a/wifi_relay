@@ -21,6 +21,8 @@ def sub_callback(topic, state):
 
     destination, unit_uuid, topic_name = get_topic_split(topic.decode())
 
+    print(state)
+
     new_version = json.loads(state.decode())['NEW_COMMIT_VERSION']
     if destination == 'input_base' and topic_name == 'update' and settings.COMMIT_VERSION != new_version:
 
