@@ -10,6 +10,7 @@ class BaseConfig:
     PEPEUNIT_TOKEN = ''
     SYNC_ENCRYPT_KEY = ''
     SECRET_KEY = ''
+    COMMIT_VERSION = ''
     PING_INTERVAL = 30
     STATE_SEND_INTERVAL = 300
 

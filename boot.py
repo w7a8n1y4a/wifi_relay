@@ -1,6 +1,8 @@
 import network
 from config import settings
 
+print(f'current_version {settings.COMMIT_VERSION}')
+
 sta_if = network.WLAN(network.STA_IF)
 
 if not sta_if.isconnected():

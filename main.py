@@ -20,6 +20,8 @@ def sub_callback(topic, state):
 
     destination, unit_uuid, topic_name = get_topic_split(topic.decode())
 
+    print(state)
+
     if destination == 'input_base' and topic_name == 'update':
 
         mqttClient.disconnect()
