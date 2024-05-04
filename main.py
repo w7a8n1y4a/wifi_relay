@@ -4,6 +4,7 @@ import os
 import machine
 import mrequests
 import shutil
+import json
 
 from lib.mqtt.simple import MQTTClient
 
@@ -20,9 +21,8 @@ def sub_callback(topic, state):
 
     destination, unit_uuid, topic_name = get_topic_split(topic.decode())
 
-    print(state)
-
-    if destination == 'input_base' and topic_name == 'update':
+    new_version = json.loads(state.decode())['NEW_COMMIT_VERSION']
+    if destination == 'input_base' and topic_name == 'update' and settings.COMMIT_VERSION != new_version:
 
         mqttClient.disconnect()
         gc.collect()
