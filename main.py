@@ -76,10 +76,10 @@ def main():
     unit_topics = get_unit_topics()
 
     for input_topic in unit_topics['input_topic']:
-        mqttClient.subscribe(f'input/{unit_uuid}/{input_topic}')
+        mqttClient.subscribe(f'{settings.PEPEUNIT_URL}/input/{unit_uuid}/{input_topic}')
     
     for input_topic in unit_topics['input_base_topic']:
-        mqttClient.subscribe(f'input_base/{unit_uuid}/{input_topic}')
+        mqttClient.subscribe(f'{settings.PEPEUNIT_URL}/input_base/{unit_uuid}/{input_topic}')
 
     print(f"Connected to MQTT  Broker :: {settings.MQTT_URL}")
     
@@ -95,13 +95,13 @@ def main():
         print(f"millis - {time.ticks_ms()//10000} - ppm - {str(ppm)}")
         
         for item in range(0, 1):
-            mqttClient.publish(f'output/{unit_uuid}/{unit_topics['output_topic'][0]}'.encode(), str(random_temp).encode())
+            mqttClient.publish(f'{settings.PEPEUNIT_URL}/output/{unit_uuid}/{unit_topics['output_topic'][0]}'.encode(), str(random_temp).encode())
         
         mqttClient.check_msg()
 
         if (time.time() - last_state_pub) >= settings.STATE_SEND_INTERVAL:
             mqttClient.publish(
-                f'output_base/{unit_uuid}/{unit_topics['output_base_topic'][0]}'.encode(),
+                f'{settings.PEPEUNIT_URL}/output_base/{unit_uuid}/{unit_topics['output_base_topic'][0]}'.encode(),
                 get_unit_state(sta_if.ifconfig()).encode()
             )
             last_state_pub = time.time()
