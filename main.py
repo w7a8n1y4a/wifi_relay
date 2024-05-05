@@ -22,40 +22,36 @@ def sub_callback(topic, state):
 
     print(state)
 
-    try:
-        import json
-    except:
-        pass
+    if destination == 'input_base' and topic_name == 'update':
 
-    new_version = json.loads(state.decode())['NEW_COMMIT_VERSION']
-    if destination == 'input_base' and topic_name == 'update' and settings.COMMIT_VERSION != new_version:
+        new_version = json.loads(state.decode())['NEW_COMMIT_VERSION']
+        if settings.COMMIT_VERSION != new_version:
+            mqttClient.disconnect()
+            gc.collect()
 
-        mqttClient.disconnect()
-        gc.collect()
+            headers = {
+                'accept': 'application/json',
+                'x-auth-token': settings.PEPEUNIT_TOKEN.encode()
+            }
 
-        headers = {
-            'accept': 'application/json',
-            'x-auth-token': settings.PEPEUNIT_TOKEN.encode()
-        }
+            url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
+            
+            r = mrequests.get(url=url, headers=headers)
 
-        url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
-        
-        r = mrequests.get(url=url, headers=headers)
+            filepath = f'/tmp/update.tgz'
+            if r.status_code == 200:
+                r.save(filepath, buf=bytearray(256))
 
-        filepath = f'/tmp/update.tgz'
-        if r.status_code == 200:
-            r.save(filepath, buf=bytearray(256))
+            r.close()
+            
+            tmp_update_path = '/update'
+            unpack_tgz(filepath, tmp_update_path)
+            os.remove(filepath)
+            
+            copy_directory(tmp_update_path, '')
+            shutil.rmtree(tmp_update_path)
 
-        r.close()
-        
-        tmp_update_path = '/update'
-        unpack_tgz(filepath, tmp_update_path)
-        os.remove(filepath)
-        
-        copy_directory(tmp_update_path, '')
-        shutil.rmtree(tmp_update_path)
-
-        reset()
+            reset()
 
 def main():
 
