@@ -14,7 +14,7 @@ def get_unit_topics():
     with open('schema.json', 'r') as f:
         return json.loads(f.read())
 
-def get_unit_state(ifconfig):
+def get_unit_state(ifconfig, settings):
 
     gc.collect()
     
@@ -24,7 +24,8 @@ def get_unit_state(ifconfig):
         'mem_free': gc.mem_free(),
         'mem_alloc': gc.mem_alloc(),
         'freq': machine.freq(),
-        'statvfs': os.statvfs('/')
+        'statvfs': os.statvfs('/'),
+        'commit_version': settings.COMMIT_VERSION
     }
 
     return json.dumps(state_dict)

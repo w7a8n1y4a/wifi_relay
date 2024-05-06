@@ -102,7 +102,7 @@ def main():
         if (time.time() - last_state_pub) >= settings.STATE_SEND_INTERVAL:
             mqttClient.publish(
                 f'{settings.PEPEUNIT_URL}/output_base/{unit_uuid}/{unit_topics['output_base_topic'][0]}'.encode(),
-                get_unit_state(sta_if.ifconfig()).encode()
+                get_unit_state(sta_if.ifconfig(), settings).encode()
             )
             last_state_pub = time.time()
 
