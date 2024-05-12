@@ -67,7 +67,7 @@ def main():
         user=settings.PEPEUNIT_TOKEN.encode(),
         password=" ".encode(),
         keepalive=60,
-        ssl=True
+        ssl=False
     )
 
     mqttClient.set_callback(sub_callback)
