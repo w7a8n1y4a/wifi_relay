@@ -91,11 +91,11 @@ def main():
         # print(time_true_pulse_us)
 
         ppm = 3228
-        random_temp = f'{time.ticks_ms()//10000} - ppm - {str(ppm)}'
-        print(f"millis - {time.ticks_ms()//10000} - ppm - {str(ppm)}")
+        random_temp = f'{time.ticks_ms()} - ppm - {str(ppm)}'
+        print(f"millis - {time.ticks_ms()} - ppm - {str(ppm)}")
         
-        for item in range(0, 1):
-            mqttClient.publish(f'{settings.PEPEUNIT_URL}/output/{unit_uuid}/{unit_topics['output_topic'][0]}'.encode(), str(random_temp).encode())
+        for topic in unit_topics['output_topic']:
+            mqttClient.publish(f'{settings.PEPEUNIT_URL}/output/{unit_uuid}/{topic}'.encode(), str(random_temp).encode())
         
         mqttClient.check_msg()
 
@@ -109,8 +109,6 @@ def main():
         if (time.time() - last_ping) >= settings.PING_INTERVAL:
             mqttClient.ping()
             last_ping = time.time()
-
-        time.sleep(1)
 
     mqttClient.disconnect()
     

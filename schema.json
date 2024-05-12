@@ -9,6 +9,15 @@
         "relay_state"
     ],
     "output_topic": [
-        "current_relay_state"
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "acht",
+        "neun",
+        "zein"
     ]
 }
