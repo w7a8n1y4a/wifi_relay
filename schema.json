@@ -10,14 +10,14 @@
     ],
     "output_topic": [
         "one/pepeunit",
-        "two",
-        "three",
-        "four",
-        "five",
-        "six",
-        "seven",
-        "acht",
-        "neun",
+        "two/pepeunit",
+        "three/pepeunit",
+        "four/pepeunit",
+        "five/pepeunit",
+        "six/pepeunit",
+        "seven/pepeunit",
+        "acht/pepeunit",
+        "neun/pepeunit",
         "zein/pepeunit"
     ]
 }
