@@ -18,7 +18,7 @@ def reset():
     
 def sub_callback(topic, state):
 
-    backend_domain, destination, unit_uuid, topic_name = get_topic_split(topic.decode())
+    backend_domain, destination, unit_uuid, topic_name, *_ = get_topic_split(topic.decode())
 
     print(state)
 
