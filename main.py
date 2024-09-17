@@ -64,6 +64,7 @@ def sub_callback(topic, state):
                 'x-auth-token': settings.PEPEUNIT_TOKEN
             }
 
+            gc.collect()
             url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/get_current_schema/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
             
             r = mrequests.get(url=url, headers=headers)
