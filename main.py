@@ -4,6 +4,7 @@ import os
 import machine
 import mrequests
 import shutil
+import json
 
 from lib.mqtt.simple import MQTTClient
 
@@ -63,7 +64,7 @@ def sub_callback(topic, state):
                 'x-auth-token': settings.PEPEUNIT_TOKEN
             }
 
-            url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
+            url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/get_current_schema/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}'
             
             r = mrequests.get(url=url, headers=headers)
 
@@ -72,7 +73,15 @@ def sub_callback(topic, state):
                 r.save(filepath, buf=bytearray(256))
             r.close()
             
+            with open(filepath, 'r') as f:
+                schema_dict = json.loads(json.loads(f.read()))
+            
+            with open(filepath, 'w') as f:
+                f.write(json.dumps(schema_dict))
+            
             print('schema is updated')
+            gc.collect()
+            
             reset()
     
     elif len(struct_topic) == 3:
