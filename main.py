@@ -73,6 +73,7 @@ def sub_callback(topic, state):
             r.close()
             
             print('schema is updated')
+            reset()
     
     elif len(struct_topic) == 3:
         schema_dict = get_unit_schema()
