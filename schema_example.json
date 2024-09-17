@@ -1,0 +1,14 @@
+{   
+    "input_base_topic": [
+        "update/pepeunit"
+    ],
+    "output_base_topic": [
+        "state/pepeunit"
+    ],
+    "input_topic": [
+        "set_relay_state/pepeunit"
+    ],
+    "output_topic": [
+        "current_relay_state/pepeunit"
+    ]
+}
