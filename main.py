@@ -55,6 +55,24 @@ def sub_callback(topic, state):
                 shutil.rmtree(tmp_update_path)
 
                 reset()
+                
+        if destination == 'input_base_topic' and topic_name == 'schema_update':
+
+            headers = {
+                'accept': 'application/json',
+                'x-auth-token': settings.PEPEUNIT_TOKEN
+            }
+
+            url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
+            
+            r = mrequests.get(url=url, headers=headers)
+
+            filepath = f'/schema.json'
+            if r.status_code == 200:
+                r.save(filepath, buf=bytearray(256))
+            r.close()
+            
+            print('schema is updated')
     
     elif len(struct_topic) == 3:
         schema_dict = get_unit_schema()
@@ -75,24 +93,6 @@ def sub_callback(topic, state):
             for output_topic in schema_dict['output_topic']['current_relay_state/pepeunit']:
                 print('set_state', relay_state_value)
                 mqttClient.publish(output_topic, str(relay_state_value))
-
-        if destination == 'input_base_topic' and topic_name == 'schema_update':
-
-            headers = {
-                'accept': 'application/json',
-                'x-auth-token': settings.PEPEUNIT_TOKEN
-            }
-
-            url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
-            
-            r = mrequests.get(url=url, headers=headers)
-
-            filepath = f'/schema.json'
-            if r.status_code == 200:
-                r.save(filepath, buf=bytearray(256))
-            r.close()
-            
-            print('schema is updated')
                     
 def main():
 
