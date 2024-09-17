@@ -126,6 +126,10 @@ def main():
     for input_topic in schema_dict['input_base_topic']['update/pepeunit']:
         print(input_topic)
         mqttClient.subscribe(input_topic)
+        
+    for input_topic in schema_dict['input_base_topic']['schema_update/pepeunit']:
+        print(input_topic)
+        mqttClient.subscribe(input_topic)
 
     print(f"Connected to MQTT  Broker :: {settings.MQTT_URL}")
     
