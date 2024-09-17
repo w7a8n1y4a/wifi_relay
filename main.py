@@ -23,7 +23,7 @@ def sub_callback(topic, state):
     print(struct_topic)
     
     if len(struct_topic) == 5:
-        backend_domain, destination, unit_uuid, topic_name, *_ = get_topic_split(topic.decode())
+        backend_domain, destination, unit_uuid, topic_name, *_ = struct_topic
         
         if destination == 'input_base_topic' and topic_name == 'update':
 
@@ -34,7 +34,7 @@ def sub_callback(topic, state):
 
                 headers = {
                     'accept': 'application/json',
-                    'x-auth-token': settings.PEPEUNIT_TOKEN.encode()
+                    'x-auth-token': settings.PEPEUNIT_TOKEN
                 }
 
                 url = f'http://{settings.PEPEUNIT_URL}/pepeunit/api/v1/units/firmware/tgz/{get_unit_uuid(settings.PEPEUNIT_TOKEN)}?wbits=9&level=9'
@@ -65,12 +65,16 @@ def sub_callback(topic, state):
             print(state.decode())
             
             relay_pin = machine.Pin(5, machine.Pin.OUT)
-            relay_pin(relay_state_value)
-            
             try:
                 relay_state_value = int(state.decode())
             except:
                 relay_state_value = 0
+                
+            relay_pin(relay_state_value)
+                
+            for output_topic in schema_dict['output_topic']['current_relay_state/pepeunit']:
+                print('set_state', relay_state_value)
+                mqttClient.publish(output_topic, str(relay_state_value))
 
 
 def main():
@@ -81,51 +85,43 @@ def main():
 
     gc.collect()
 
+    print(settings.PEPEUNIT_TOKEN)
+    
     mqttClient = MQTTClient(
         unit_uuid,
         settings.MQTT_URL,
-        user=settings.PEPEUNIT_TOKEN.encode(),
-        password=" ".encode(),
+        user=settings.PEPEUNIT_TOKEN,
+        password="",
         keepalive=60,
-        ssl=False
     )
 
     mqttClient.set_callback(sub_callback)
     mqttClient.connect()
 
     schema_dict = get_unit_schema()
+    
+    print(schema_dict)
 
     for input_topic in schema_dict['input_topic']['set_relay_state/pepeunit']:
+        print(input_topic)
         mqttClient.subscribe(input_topic)
     
     for input_topic in schema_dict['input_base_topic']['update/pepeunit']:
+        print(input_topic)
         mqttClient.subscribe(input_topic)
 
     print(f"Connected to MQTT  Broker :: {settings.MQTT_URL}")
     
-    global relay_state_value
-    relay_state_value = 0
     last_state_pub = time.time()
     last_ping = time.time()
     while True:
-        # time_true_pulse_us = machine.time_pulse_us(machine.Pin(15, machine.Pin.IN), 1000000)
-        # ppm = 2000 * (time_true_pulse_us/1000000)
-        # print(time_true_pulse_us)
-
-        ppm = 3228
-        random_temp = f'{time.ticks_ms()} - ppm - {str(ppm)}'
-        print(f"millis - {time.ticks_ms()} - ppm - {str(ppm)}")
-        
-        for output_topic in schema_dict['output_topic']['current_relay_state/pepeunit']:
-            mqttClient.publish(output_topic.encode(), str(relay_state_value).encode())
-        
         mqttClient.check_msg()
 
         if (time.time() - last_state_pub) >= settings.STATE_SEND_INTERVAL:
             for output_topic in schema_dict['output_base_topic']['state/pepeunit']:
                 mqttClient.publish(
-                    output_topic.encode(),
-                    get_unit_state(sta_if.ifconfig(), settings).encode()
+                    output_topic,
+                    get_unit_state(sta_if.ifconfig(), settings)
                 )
             last_state_pub = time.time()
 
