@@ -13,7 +13,6 @@
         "relay_command/pepeunit"
     ],
     "output_topic": [
-        "relay_state/pepeunit",
         "last_command/pepeunit"
     ]
 }
