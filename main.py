@@ -12,18 +12,14 @@ last_command = None
 target_command = None
 
 pwm = None
-force_activation_pin = None
-force_deactivation_pin = None
 
 active_action = None
 scheduled_timer = None
 
-def init_pins(client):
-    global pwm, force_activation_pin, force_deactivation_pin
+def init_pin(client):
+    global pwm
 
     pwm = machine.PWM(machine.Pin(int(client.settings.PIN_RELAY)), freq=int(client.settings.PIN_RELAY_PWM_FREQUENCY), duty_u16=0)
-    force_activation_pin = machine.Pin(int(client.settings.PIN_FORCE_ACTIVATION), machine.Pin.IN, machine.Pin.PULL_UP)
-    force_deactivation_pin = machine.Pin(int(client.settings.PIN_FORCE_DEACTIVATION), machine.Pin.IN, machine.Pin.PULL_UP)
 
 
 def output_handler(client: PepeunitClient):
@@ -113,7 +109,7 @@ def main():
     client.subscribe_all_schema_topics()
     client.set_output_handler(output_handler)
 
-    init_pins(client)
+    init_pin(client)
 
     client.run_main_cycle()
 
