@@ -15,6 +15,8 @@ pwm = None
 force_activation_pin = None
 force_deactivation_pin = None
 
+active_action = None
+scheduled_timer = None
 
 def init_pins(client):
     global pwm, force_activation_pin, force_deactivation_pin
@@ -26,10 +28,9 @@ def init_pins(client):
 
 def output_handler(client: PepeunitClient):
     global last_command_state_update_time, last_output_send_time
-    global pwm, last_command, target_command
+    global pwm, last_command, target_command, active_action, scheduled_timer
 
     current_time = client.time_manager.get_epoch_ms()
-    last_command_type = last_command.get('command_type')
 
     # publish last command
     if (current_time - last_output_send_time) >= client.settings.PUBLISH_SEND_INTERVAL:
@@ -38,35 +39,53 @@ def output_handler(client: PepeunitClient):
 
         last_output_send_time = current_time
 
+    # non-blocking scheduled timer start
+    if isinstance(scheduled_timer, dict) and current_time >= scheduled_timer.get('time_run', 0):
+        duty = scheduled_timer.get('target_duty', 0)
+        duration = scheduled_timer.get('duration', 0)
+        pwm.duty_u16(duty)
+        active_action = {
+            'kind': 'timer',
+            'end_time': current_time + duration,
+        }
+        scheduled_timer = None
+
+    # non-blocking timed action stop
+    if isinstance(active_action, dict) and current_time >= active_action.get('end_time', 0):
+        pwm.duty_u16(0)
+        active_action = None
+
     # command execution
     if (current_time - last_command_state_update_time) >= 50:
         if target_command is not None:
             last_command = target_command
             target_command = None
 
-            command_type = target_command.get('command_type')
-            target_duty = target_command.get('target_duty')
-            duration = target_command.get('duration')
-            time_run = target_command.get('time_run')
-
-            last_command = target_command
-            last_command['time'] = current_time
-
+            command_type = last_command.get('command_type')
+            target_duty = int(last_command.get('target_duty', 0))
+            duration = int(last_command.get('duration', 0))
+            time_run = int(last_command.get('time_run', 0))
+            
+            active_action = None
+            scheduled_timer = None
             if command_type == 'set':
                 pwm.duty_u16(int(target_duty))
 
             elif command_type == 'duration':
-                pass
+                pwm.duty_u16(int(target_duty))
+                active_action = {
+                    'kind': 'duration',
+                    'end_time': current_time + duration,
+                }
             elif command_type == 'timer':
-                pass
+                scheduled_timer = {
+                    'kind': 'timer',
+                    'time_run': time_run,
+                    'duration': duration,
+                    'target_duty': int(target_duty),
+                }
 
         last_command_state_update_time = current_time
-
-    if last_command_type in ["timer", "duration"]:
-        if current_time - last_command['time'] >= 0:
-            pwm.duty_u16(0)
-            last_command = None
-            target_command = None
 
 def input_handler(client: PepeunitClient, msg):
     global target_command
@@ -79,6 +98,7 @@ def input_handler(client: PepeunitClient, msg):
         if topic_name == 'relay_command/pepeunit':
             client.logger.info('Get command from mqtt: ' + str(msg.payload))
             target_command = json.loads(msg.payload)
+            target_command['time'] = client.time_manager.get_epoch_ms()
 
 
 def main():
