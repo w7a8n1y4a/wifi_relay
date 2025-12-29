@@ -52,7 +52,7 @@ def output_handler(client: PepeunitClient):
         active_action = None
 
     # command execution
-    if (current_time - last_command_state_update_time) >= 50:
+    if (current_time - last_command_state_update_time) >= 5:
         if target_command is not None:
             last_command = target_command
             target_command = None
@@ -73,7 +73,7 @@ def output_handler(client: PepeunitClient):
                     'kind': 'duration',
                     'end_time': current_time + duration,
                 }
-            elif command_type == 'timer':
+            elif command_type == 'timer' and client.settings.FF_TIMER_COMMAND_ENABLE:
                 scheduled_timer = {
                     'kind': 'timer',
                     'time_run': time_run,
@@ -102,7 +102,8 @@ def main():
         env_file_path='/env.json',
         schema_file_path='/schema.json',
         log_file_path='/log.json',
-        sta=sta
+        sta=sta,
+        cycle_speed=0.001,
     )
     client.set_mqtt_input_handler(input_handler)
     client.mqtt_client.connect()
