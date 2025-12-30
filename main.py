@@ -1,4 +1,3 @@
-import time
 import machine
 import ujson as json
 
@@ -118,8 +117,9 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+    except KeyboardInterrupt:
+        raise
     except Exception as e:
-        try:
-            print('Error:', str(e))
-        except Exception:
-            pass
+        print('Critical Error', str(e))
+        print("I'll be back")
+        machine.reset()
