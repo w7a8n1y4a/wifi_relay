@@ -5,10 +5,6 @@ import ujson as json
 from pepeunit_micropython_client.client import PepeunitClient
 from pepeunit_micropython_client.enums import SearchTopicType, SearchScope
 
-from supervisor import Supervisor
-
-sup = None
-
 
 last_command_state_update_time = 0
 last_output_send_time = 0
@@ -20,8 +16,6 @@ pwm = None
 active_action = None
 scheduled_timer = None
 
-watchdog_state = {}
-
 def init_pin(client):
     global pwm
 
@@ -31,9 +25,6 @@ def init_pin(client):
 def output_handler(client: PepeunitClient):
     global last_command_state_update_time, last_output_send_time
     global pwm, last_command, target_command, active_action, scheduled_timer
-
-    if sup:
-        sup.wifi_watchdog(client, watchdog_state, interval_ms=1000)
 
     current_time = client.time_manager.get_epoch_ms()
 
@@ -106,7 +97,7 @@ def input_handler(client: PepeunitClient, msg):
             target_command['time'] = client.time_manager.get_epoch_ms()
 
 
-def main(sta):
+def main():
     client = PepeunitClient(
         env_file_path='/env.json',
         schema_file_path='/schema.json',
@@ -121,13 +112,14 @@ def main(sta):
 
     init_pin(client)
 
-    try:
-        client.run_main_cycle()
-    finally:
-        client.mqtt_client.disconnect()
+    client.run_main_cycle()
 
 
 if __name__ == '__main__':
-    global sta
-    sup = Supervisor(env_path='/env.json', log_path='/log.json')
-    sup.run_forever(main, sta)
+    try:
+        main()
+    except Exception as e:
+        try:
+            print('Error:', str(e))
+        except Exception:
+            pass
