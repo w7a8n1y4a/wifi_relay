@@ -18,27 +18,68 @@ class WifiManager:
     def debug(self, text):
         print(self.DEBUG_PREFIX, text)
 
+    @staticmethod
+    def _decode_ssid(value):
+        if isinstance(value, bytes):
+            try:
+                return value.decode()
+            except Exception:
+                return ""
+        if value is None:
+            return ""
+        return str(value)
+
     def get_sta(self):
         if self._sta is None:
             sta = network.WLAN(network.STA_IF)
             if not sta.active():
                 sta.active(True)
+            try:
+                sta.config(reconnects=0)
+            except Exception:
+                pass
             self._sta = sta
         return self._sta
 
     def is_connected(self):
         return bool(self.get_sta().isconnected())
 
+    def get_connected_ssid(self):
+        sta = self.get_sta()
+        for key in ("essid", "ssid"):
+            try:
+                return self._decode_ssid(sta.config(key))
+            except Exception:
+                pass
+        return ""
+
+    def _force_sta_reset(self):
+        sta = self.get_sta()
+        try:
+            sta.disconnect()
+        except Exception:
+            pass
+        try:
+            sta.active(False)
+        except Exception:
+            pass
+        time.sleep_ms(200)
+        try:
+            sta.active(True)
+        except Exception:
+            pass
+        try:
+            sta.config(reconnects=0)
+        except Exception:
+            pass
+        time.sleep_ms(200)
+
     def scan_has_target_ssid(self):
         sta = self.get_sta()
         scan = sta.scan()
         for ap in scan:
             ap_ssid = ap[0]
-            if isinstance(ap_ssid, bytes):
-                try:
-                    ap_ssid = ap_ssid.decode()
-                except Exception:
-                    ap_ssid = ""
+            ap_ssid = self._decode_ssid(ap_ssid)
             if ap_ssid == self.ssid:
                 return True
         return False
@@ -47,13 +88,18 @@ class WifiManager:
         sta = self.get_sta()
 
         if sta.isconnected():
-            return True
+            connected_ssid = self.get_connected_ssid()
+            if self.ssid and connected_ssid == self.ssid:
+                return True
+            self.debug(
+                'connected to "{}" but target ssid is "{}"; forcing reconnect'.format(
+                    connected_ssid, self.ssid
+                )
+            )
+            self._force_sta_reset()
 
-        if not self.ssid:
-            self.debug("WIFI_SSID is empty; can't connect")
-            return False
-
-        sta.connect(self.ssid, self.password)
+        self._force_sta_reset()
+        sta.connect(str(self.ssid), str(self.password))
 
         started = time.ticks_ms()
         while not sta.isconnected():
@@ -67,6 +113,16 @@ class WifiManager:
         attempt = 0
         while True:
             if self.is_connected():
+                connected_ssid = self.get_connected_ssid()
+                if self.ssid and connected_ssid and connected_ssid != self.ssid:
+                    self.debug(
+                        'unexpected cached connection to "{}"; need "{}"; disconnecting'.format(
+                            connected_ssid, self.ssid
+                        )
+                    )
+                    self._force_sta_reset()
+                    attempt += 1
+                    continue
                 try:
                     self.debug("connected: " + str(self.get_sta().ifconfig()))
                 except Exception:
