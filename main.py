@@ -96,14 +96,7 @@ def input_handler(client: PepeunitClient, msg):
             target_command['time'] = client.time_manager.get_epoch_ms()
 
 
-def main():
-    client = PepeunitClient(
-        env_file_path='/env.json',
-        schema_file_path='/schema.json',
-        log_file_path='/log.json',
-        sta=sta,
-        cycle_speed=0.001,
-    )
+def main(client: PepeunitClient):
     client.set_mqtt_input_handler(input_handler)
     client.mqtt_client.connect()
     client.subscribe_all_schema_topics()
@@ -116,10 +109,17 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
+        client = PepeunitClient(
+            env_file_path='/env.json',
+            schema_file_path='/schema.json',
+            log_file_path='/log.json',
+            sta=sta,
+            cycle_speed=0.001,
+        )
+        main(client)
     except KeyboardInterrupt:
         raise
     except Exception as e:
-        print('Critical Error', str(e))
+        client.logger.critical(str(e), file_only=True)
         print("I'll be back")
         machine.reset()
