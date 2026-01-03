@@ -1,14 +1,19 @@
 import gc
 
+from pepeunit_micropython_client.client import PepeunitClient
+
 print('\n')
 
-from wifi_manager import WifiManager
+client = PepeunitClient(
+    env_file_path='/env.json',
+    schema_file_path='/schema.json',
+    log_file_path='/log.json',
+    cycle_speed=0.001,
+    ff_wifi_manager_enable=True,
+)
 
-wifi = WifiManager(env_file_path='/env.json')
-sta = wifi.get_sta()
-wifi.connect_forever(connect_timeout_ms=10000)
+client.wifi_manager.connect_forever()
 
 gc.collect()
 
-print('free_mem:',  gc.mem_free(), 'alloc_mem:',  gc.mem_alloc())
-print('Boot Success')
+client.logger.info(f'Init Success: free_mem {gc.mem_free()}: alloc_mem {gc.mem_alloc()}', file_only=True)

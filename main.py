@@ -109,17 +109,10 @@ def main(client: PepeunitClient):
 
 if __name__ == '__main__':
     try:
-        client = PepeunitClient(
-            env_file_path='/env.json',
-            schema_file_path='/schema.json',
-            log_file_path='/log.json',
-            sta=sta,
-            cycle_speed=0.001,
-        )
         main(client)
     except KeyboardInterrupt:
         raise
     except Exception as e:
-        client.logger.critical(str(e), file_only=True)
-        print("I'll be back")
+        client.logger.critical(f"Error with reset: {str(e)}", file_only=True)
+        client.logger.info("I'll be back", file_only=True)
         machine.reset()
