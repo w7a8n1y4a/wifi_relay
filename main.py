@@ -63,6 +63,7 @@ def output_handler(client: PepeunitClient):
             
             active_action = None
             scheduled_timer = None
+
             if command_type == 'set':
                 pwm.duty_u16(int(target_duty))
 
@@ -72,7 +73,7 @@ def output_handler(client: PepeunitClient):
                     'kind': 'duration',
                     'end_time': current_time + duration,
                 }
-            elif command_type == 'timer' and client.settings.FF_TIMER_COMMAND_ENABLE:
+            elif client.settings.FF_TIMER_COMMAND_ENABLE and command_type == 'timer':
                 scheduled_timer = {
                     'kind': 'timer',
                     'time_run': time_run,
@@ -113,5 +114,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         raise
     except Exception as e:
+        if pwm is not None:
+            pwm.duty_u16(0)
         client.logger.critical(f"Error with reset: {str(e)}", file_only=True)
         client.restart_device()

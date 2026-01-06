@@ -1,5 +1,4 @@
 {
-    "FF_LOW_ENERGY_TYPE": "deepsleep",
     "FF_TIMER_COMMAND_ENABLE": true,
     "PIN_RELAY": 5,
     "PIN_RELAY_PWM_FREQUENCY": 10000,
