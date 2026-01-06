@@ -1,0 +1,58 @@
+[general]
+name = "WiFi Relay"
+description = "Управляет состоянием реле или транзистора при помощи `PWM`. Принимает управляющие команды в топик `relay_command/pepeunit`"
+language = "Micropython"
+hardware = ["esp8266", "relay"]
+firmware = [
+  {name = "ESP8266_GENERIC-v1.26.1-PEPEUNIT-v1.1.0.bin", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/57/download"}
+]
+stack = ["pepeunit_micropython_client"]
+version = "1.0.0"
+license = "AGPL v3 License"
+authors = [
+    {name = "Ivan Serebrennikov", email = "admin@silberworks.com"}
+]
+
+
+[images]
+schema = "https://minio.pepemoss.com/public-data/image/wifi_relay.png"
+
+[physical_io]
+"client.settings.PIN_RELAY" = "Управляющий `PWM` вывод реле или транзистора"
+
+[env_description]
+FF_TIMER_COMMAND_ENABLE = "Доступно ли управление по таймеру: `true` или `false`"
+PIN_RELAY = "Номер пина к которому подключается реле или транзистор"
+PIN_RELAY_PWM_FREQUENCY = "Частота `PWM` сигнала в герцах"
+PUBLISH_SEND_INTERVAL = "Частота публикации данных в `last_command/pepeunit` в миллисекундах"
+PUC_WIFI_SSID = "Имя сети `WiFi`"
+PUC_WIFI_PASS = "Пароль от сети `WiFi`"
+
+[topic_assignment]
+"last_command/pepeunit" = "Отправляет последнюю полученную команду каждые `PUBLISH_SEND_INTERVAL` миллисекунд"
+"relay_command/pepeunit" = "Принимает внешние команды управления"
+
+[work_algorithm]
+steps = [
+  "Подключение к `WiFi`",
+  "Подключение к `MQTT` Брокеру",
+  "Инициализация `PWM` пина",
+  "Запуск ожидания команды из топика `relay_command/pepeunit`",
+  "Каждые `PUBLISH_SEND_INTERVAL` миллисекунд публикуются последняя полученная команда в `last_command/pepeunit`",
+  "Команды могут иметь разный `command_type`: `set`, `duration`, `timer`",
+  "`set` - устанавливает `duty` для `PWM` пина на постояной основе. Пример: `{\"command_type\": \"set\", \"target_duty\": 65536}`",
+  "`duration` - устанавливает `duty` для `PWM` пина на `duration` миллисекунд. Пример: `{\"command_type\": \"duration\", \"duration\": 3000, \"target_duty\": 65536}`",
+  "`timer` - устанавливает `duty` для `PWM` пина на `duration` миллисекунд, но начнёт выполенение команды после наступления `time_run` в миллисекундах. Требует, чтобы `FF_TIMER_COMMAND_ENABLE` был `true`. Пример: `{\"command_type\": \"timer\", \"duration\": 1000, \"target_duty\": 65536, \"time_run\": 1766966077037}`",
+  "`target_duty` внутри команд - указывает скважность `PWM` в диапазоне от `0` до `65536` включительно"
+]
+
+[installation]
+steps = [
+  "Установите образ `Micropython` указанный в `firmware` на `esp8266`, как это сделано в [руководстве](https://micropython.org/download/ESP8266_GENERIC/)",
+  "Создайте `Unit` в `Pepeunit`",
+  "Установите переменные окружения в `Pepeunit`",
+  "Скачайте архив c программой из `Pepeunit`",
+  "Распакуйте архив в директорию",
+  "Загрузите файлы из директории на физическое устройство, например командой: `ampy -p /dev/ttyUSB0 -b 115200 put ./ .`",
+  "Запустить устройство нажатием кнопки `reset`"
+]
