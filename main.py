@@ -1,4 +1,5 @@
 import machine
+import uasyncio as asyncio
 import ujson as json
 
 from pepeunit_micropython_client.client import PepeunitClient
@@ -15,13 +16,14 @@ pwm = None
 active_action = None
 scheduled_timer = None
 
+
 def init_pin(client):
     global pwm
 
     pwm = machine.PWM(machine.Pin(int(client.settings.PIN_RELAY)), freq=int(client.settings.PIN_RELAY_PWM_FREQUENCY), duty_u16=0)
 
 
-def output_handler(client: PepeunitClient):
+async def output_handler(client: PepeunitClient):
     global last_command_state_update_time, last_output_send_time
     global pwm, last_command, target_command, active_action, scheduled_timer
 
@@ -29,7 +31,7 @@ def output_handler(client: PepeunitClient):
 
     # publish last command
     if (current_time - last_output_send_time) >= client.settings.PUBLISH_SEND_INTERVAL:
-        client.publish_to_topics('last_command/pepeunit', json.dumps(last_command))
+        await client.publish_to_topics('last_command/pepeunit', json.dumps(last_command))
         client.logger.debug('last_command: ' + json.dumps(last_command), file_only=True)
 
         last_output_send_time = current_time
@@ -60,7 +62,7 @@ def output_handler(client: PepeunitClient):
             target_duty = int(last_command.get('target_duty', 0))
             duration = int(last_command.get('duration', 0))
             time_run = int(last_command.get('time_run', 0))
-            
+
             active_action = None
             scheduled_timer = None
 
@@ -83,13 +85,14 @@ def output_handler(client: PepeunitClient):
 
         last_command_state_update_time = current_time
 
-def input_handler(client: PepeunitClient, msg):
+
+async def input_handler(client: PepeunitClient, msg):
     global target_command
 
     parts = msg.topic.split('/')
 
     if len(parts) == 3:
-        topic_name = client.schema.find_topic_by_unit_node(parts[1], SearchTopicType.UNIT_NODE_UUID, SearchScope.INPUT)
+        topic_name = await client.schema.find_topic_by_unit_node(parts[1], SearchTopicType.UNIT_NODE_UUID, SearchScope.INPUT)
 
         if topic_name == 'relay_command/pepeunit':
             client.logger.info('Get command from mqtt: ' + str(msg.payload))
@@ -97,20 +100,23 @@ def input_handler(client: PepeunitClient, msg):
             target_command['time'] = client.time_manager.get_epoch_ms()
 
 
-def main(client: PepeunitClient):
+async def main_async(client: PepeunitClient):
+    if client.wifi_manager:
+        await client.wifi_manager.ensure_connected()
+    await client.time_manager.sync_epoch_ms_from_ntp()
+
     client.set_mqtt_input_handler(input_handler)
-    client.mqtt_client.connect()
     client.subscribe_all_schema_topics()
     client.set_output_handler(output_handler)
 
     init_pin(client)
 
-    client.run_main_cycle()
+    await client.run_main_cycle()
 
 
 if __name__ == '__main__':
     try:
-        main(client)
+        asyncio.run(main_async(client))
     except KeyboardInterrupt:
         raise
     except Exception as e:
