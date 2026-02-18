@@ -5,9 +5,9 @@ Parameter | Implementation
 Description | Управляет состоянием реле или транзистора при помощи `PWM`. Принимает управляющие команды в топик `relay_command/pepeunit`
 Lang | `Micropython`
 Hardware | `esp8266`, `relay`
-Firmware | [ESP8266_GENERIC-v1.26.1-PEPEUNIT-v1.1.0.bin](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/57/download)
+Firmware | [ESP8266_GENERIC-v1.27.0-PEPEUNIT-v1.1.1.bin](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/60/download)
 Stack | `pepeunit_micropython_client`
-Version | 1.0.0
+Version | 1.1.1
 License | AGPL v3 License
 Authors | Ivan Serebrennikov <admin@silberworks.com>
 

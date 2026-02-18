@@ -4,10 +4,10 @@ description = "Управляет состоянием реле или тран�
 language = "Micropython"
 hardware = ["esp8266", "relay"]
 firmware = [
-  {name = "ESP8266_GENERIC-v1.26.1-PEPEUNIT-v1.1.0.bin", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/57/download"}
+  {name = "ESP8266_GENERIC-v1.27.0-PEPEUNIT-v1.1.1.bin", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/60/download"}
 ]
 stack = ["pepeunit_micropython_client"]
-version = "1.0.0"
+version = "1.1.1"
 license = "AGPL v3 License"
 authors = [
     {name = "Ivan Serebrennikov", email = "admin@silberworks.com"}
