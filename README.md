@@ -17,21 +17,27 @@ Authors | Ivan Serebrennikov <admin@silberworks.com>
 
 ## Physical IO
 
-- `client.settings.PIN_RELAY` - Управляющий `PWM` вывод реле или транзистора
+Key | Description
+-- | --
+`client.settings.PIN_RELAY` | Управляющий `PWM` вывод реле или транзистора
 
 ## Env variable assignment
 
-1. `FF_TIMER_COMMAND_ENABLE` - Доступно ли управление по таймеру: `true` или `false`
-2. `PIN_RELAY` - Номер пина к которому подключается реле или транзистор
-3. `PIN_RELAY_PWM_FREQUENCY` - Частота `PWM` сигнала в герцах
-4. `PUBLISH_SEND_INTERVAL` - Частота публикации данных в `last_command/pepeunit` в миллисекундах
-5. `PUC_WIFI_SSID` - Имя сети `WiFi`
-6. `PUC_WIFI_PASS` - Пароль от сети `WiFi`
+Variable | Description
+-- | --
+`FF_TIMER_COMMAND_ENABLE` | Доступно ли управление по таймеру: `true` или `false`
+`PIN_RELAY` | Номер пина к которому подключается реле или транзистор
+`PIN_RELAY_PWM_FREQUENCY` | Частота `PWM` сигнала в герцах
+`PUBLISH_SEND_INTERVAL` | Частота публикации данных в `last_command/pepeunit` в миллисекундах
+`PUC_WIFI_SSID` | Имя сети `WiFi`
+`PUC_WIFI_PASS` | Пароль от сети `WiFi`
 
 ## Assignment of Device Topics
 
-- `last_command/pepeunit` - Отправляет последнюю полученную команду каждые `PUBLISH_SEND_INTERVAL` миллисекунд
-- `relay_command/pepeunit` - Принимает внешние команды управления
+Topic | Description
+-- | --
+`last_command/pepeunit` | Отправляет последнюю полученную команду каждые `PUBLISH_SEND_INTERVAL` миллисекунд
+`relay_command/pepeunit` | Принимает внешние команды управления
 
 ## Work algorithm
 
