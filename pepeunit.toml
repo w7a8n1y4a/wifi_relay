@@ -15,7 +15,7 @@ authors = [
 
 
 [images]
-schema = "https://minio.pepemoss.com/public-data/image/wifi_relay.png"
+schema = "https://minio.pepemoss.com/public-data/schema/wifi_relay.png"
 
 [physical_io]
 "client.settings.PIN_RELAY" = "Управляющий `PWM` вывод реле или транзистора"
